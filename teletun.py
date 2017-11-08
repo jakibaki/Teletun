@@ -26,19 +26,19 @@ sender = Sender(host="localhost", port=4458)
 try:
     contacts = [c for c in sender.dialog_list()]
     for i, user in enumerate(contacts):
-        print(unicode(i) + ': \t' + unicode(user['print_name']))
+        print((str(i) + ': \t' + str(user['print_name'])))
 except ConnectionError:
     print('Could not connect to telegram-cli. Start it by issuing "telegram-cli --json -P 4458" in a separate console.')
     sys.exit(1)
 
 # Ask user to choose contact
-i = int(input('Telegram online, please enter contact to connect to (by number): '))
+i = int(eval(input('Telegram online, please enter contact to connect to (by number): ')))
 
 # Print username
 try:
-    username = unicode(contacts[i]['print_name'])
+    username = str(contacts[i]['print_name'])
     peer_id = contacts[i]['peer_id']
-    print('Connecting to partner: ' + username)
+    print(('Connecting to partner: ' + username))
 except IndexError:
     print('Please enter a number in the above range!')
     sys.exit(1)
@@ -46,7 +46,7 @@ except IndexError:
 # Create TUN device for network capture and injections
 tun = TunTapDevice(name='teletun-device')
 
-print(tun.name + ' has been created, information follows:')
+print((tun.name + ' has been created, information follows:'))
 
 
 # Set IP address based on --server flag
@@ -60,10 +60,10 @@ else:
 tun.netmask = '255.255.255.0'
 tun.mtu = 1500
 
-print('Address: ' + tun.addr)
-print('Dest.-Address: ' + tun.dstaddr)
-print('Netmask: ' + tun.netmask)
-print('MTU: ' + str(tun.mtu))
+print(('Address: ' + tun.addr))
+print(('Dest.-Address: ' + tun.dstaddr))
+print(('Netmask: ' + tun.netmask))
+print(('MTU: ' + str(tun.mtu)))
 
 
 # Start TUN device
@@ -93,7 +93,7 @@ def main_loop():
         # Check if it is an actual "message" message and if the sender is our peer
         if (
             msg is not None and
-            msg['event'] == unicode('message') and
+            msg['event'] == str('message') and
             not msg['own'] and
             msg['sender']['peer_id'] == peer_id
         ):
@@ -115,7 +115,7 @@ thread.start()
 print('Connected! Sending Invitation!')
 
 # Send the invitation message
-sender.msg(username, unicode('Hello, I would like to establish a Layer 3 Tunnel with you! -teletun'))
+sender.msg(username, str('Hello, I would like to establish a Layer 3 Tunnel with you! -teletun'))
 
 while up:
     # Continually read from the tunnel and write data to telegram in base64
@@ -123,15 +123,15 @@ while up:
     buf = tun.read(tun.mtu)
     data = base64.b64encode(buf)
     sent += len(data)
-    sender.msg(username, unicode(data))
+    sender.msg(username, str(data))
 
 # Cleanup and stop application
 up = False
 tun.down()
 receiver.stop()
 
-print('Bytes sent via Telegram: ' + str(sent))
-print('Bytes received via Telegram: ' + str(received))
+print(('Bytes sent via Telegram: ' + str(sent)))
+print(('Bytes received via Telegram: ' + str(received)))
 
 print('~~ Bye bye! ~~')
 
